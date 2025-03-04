@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Registro, Verificacion #LoginView  # Importa las vistas necesarias
+from .views import Registro, Verificacion
 
 urlpatterns = [
     # Ruta para el registro de usuarios
@@ -8,6 +8,5 @@ urlpatterns = [
     # Ruta para la verificación de usuarios mediante un token
     path('verificacion/<str:token>/', Verificacion.as_view(), name='verificacion'),
 
-    # Ruta para el login
-    path('login/', LoginView.as_view(), name='login'),
+
 ]

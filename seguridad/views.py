@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import Http404, JsonResponse, HttpResponseRedirect
 from http import HTTPStatus
 import os
 import uuid
@@ -167,5 +167,3 @@ class Verificacion(APIView):
             # Si no se encuentra el token, lanzar un error 404
             raise Http404
         
-class Login:
-    def post (self,request):
