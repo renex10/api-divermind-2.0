@@ -130,7 +130,6 @@ class Registro(APIView):
         # Devuelve una respuesta de éxito con el token
         return JsonResponse({"estado": "éxito", "mensaje": "Registro exitoso", "token": token}, status=HTTPStatus.OK)
 
-# Clase Verificacion que maneja la verificación de usuarios
 class Verificacion(APIView):
     def get(self, request, token):
         # Verificar si el token es None o está vacío
@@ -166,4 +165,3 @@ class Verificacion(APIView):
         except UsersMetadata.DoesNotExist:
             # Si no se encuentra el token, lanzar un error 404
             raise Http404
-        
