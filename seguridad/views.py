@@ -54,7 +54,8 @@ class Registro(APIView):
             u.save()
             
             # Genera la URL utilizando f-string correctamente
-            url = f"{os.getenv('base_URL')}/api/v1/verificacion/{token}"
+            url = f"{os.getenv('base_URL')}/api/v1/seguridad/verificacion/{token}"
+
             
             # HTML con estilo neumorfismo
             html = f"""
@@ -165,3 +166,15 @@ class Verificacion(APIView):
         except UsersMetadata.DoesNotExist:
             # Si no se encuentra el token, lanzar un error 404
             raise Http404
+        
+
+class Login:
+    def post(self,request):
+         # Verifica si el campo 'correo' está presente y no está vacío
+        if request.data.get("correo") is None or not request.data.get("correo"):
+            return JsonResponse({"estado": "error", "mensaje": "El campo 'correo' es obligatorio"}, status=HTTPStatus.BAD_REQUEST)
+         # Verifica si el campo 'email' está presente y no está vacío
+        if request.data.get("email") is None or not request.data.get("email"):
+            return JsonResponse({"estado": "error", "mensaje": "El campo 'email' es obligatorio"}, status=HTTPStatus.BAD_REQUEST)
+        
+        
