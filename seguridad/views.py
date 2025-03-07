@@ -20,50 +20,27 @@ from jose import jwt
 # Carga las variables de entorno desde un archivo .env
 load_dotenv()
 
-# Clase Registro que maneja las solicitudes POST para el registro de usuarios
 class Registro(APIView):
-    def post(self, request):
+    def crear_usuario(self, request):
         """
-        Maneja las solicitudes POST para registrar un nuevo usuario.
-        Verifica que los campos 'nombre', 'correo' y 'password' estén presentes y no estén vacíos.
-        Devuelve una respuesta JSON con el estado y un mensaje correspondiente.
+        Método para crear un usuario y generar un token.
+        Retorna el usuario creado y el token.
         """
-        
-        # Verifica si el campo 'nombre' está presente y no está vacío
-        if request.data.get("nombre") is None or not request.data.get("nombre"):
-            return JsonResponse({"estado": "error", "mensaje": "El campo 'nombre' es obligatorio"}, status=HTTPStatus.BAD_REQUEST)
-        
-        # Verifica si el campo 'correo' está presente y no está vacío
-        if request.data.get("correo") is None or not request.data.get("correo"):
-            return JsonResponse({"estado": "error", "mensaje": "El campo 'correo' es obligatorio"}, status=HTTPStatus.BAD_REQUEST)
-        
-        # Verifica si el campo 'password' está presente y no está vacío
-        if request.data.get("password") is None or not request.data.get("password"):
-            return JsonResponse({"estado": "error", "mensaje": "El campo 'password' es obligatorio"}, status=HTTPStatus.BAD_REQUEST)
-        
         try:
-            # Crea un nuevo usuario en la tabla de autenticación
+            # Crea un nuevo usuario
             u = User.objects.create_user(
-                username=request.data["nombre"],  # Nombre de usuario
-                email=request.data["correo"],  # Correo electrónico
-                password=request.data["password"],  # Contraseña
-                is_active=False  # El usuario no está activo por defecto
+                username=request.data["nombre"],
+                email=request.data["correo"],
+                password=request.data["password"],
+                is_active=False
             )
             
             # Genera un token único
             token = str(uuid.uuid4())
-            
-            # Crea una entrada en UsersMetadata con el token y el usuario
             UsersMetadata.objects.create(token=token, user=u)
             
-            # Guarda el usuario
-            u.save()
-            
-            # Genera la URL utilizando f-string correctamente
+            # Envía el correo de verificación
             url = f"{os.getenv('base_URL')}/api/v1/seguridad/verificacion/{token}"
-
-            
-            # HTML con estilo neumorfismo
             html = f"""
             <!DOCTYPE html>
             <html lang="es">
@@ -121,22 +98,32 @@ class Registro(APIView):
             </body>
             </html>
             """
-            
             utilidades.sendMail(html, "verificacion", request.data["correo"])
             
+            return u, token
+        
         except Exception as e:
-            # Maneja cualquier excepción que ocurra durante la creación del usuario
-            return JsonResponse(
-                {"estado": "error", "mensaje": "Ocurrió un error inesperado: " + str(e)},
-                status=HTTPStatus.BAD_REQUEST
-            )
-        
-        # Imprime la URL en la consola
-        print(url)
-        
-        # Devuelve una respuesta de éxito con el token
-        return JsonResponse({"estado": "éxito", "mensaje": "Registro exitoso", "token": token}, status=HTTPStatus.OK)
+            raise Exception(f"Ocurrió un error inesperado: {str(e)}")
 
+    def post(self, request):
+        """
+        Maneja las solicitudes POST para registrar un nuevo usuario.
+        """
+        # Verifica si los campos obligatorios están presentes
+        if not all([request.data.get("nombre"), request.data.get("correo"), request.data.get("password")]):
+            return JsonResponse({"estado": "error", "mensaje": "Todos los campos son obligatorios"}, status=HTTPStatus.BAD_REQUEST)
+        
+        try:
+            # Crea el usuario y genera el token
+            usuario, token = self.crear_usuario(request)
+            
+            # Retorna una respuesta de éxito
+            return JsonResponse({"estado": "éxito", "mensaje": "Registro exitoso", "token": token}, status=HTTPStatus.OK)
+        
+        except Exception as e:
+            return JsonResponse({"estado": "error", "mensaje": str(e)}, status=HTTPStatus.BAD_REQUEST)
+        
+        
 class Verificacion(APIView):
     def get(self, request, token):
         # Verificar si el token es None o está vacío

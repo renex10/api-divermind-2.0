@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'seguridad',
+    'registros',  # Asegúrate de que la aplicación esté registrada
 ]
 
 MIDDLEWARE = [
