@@ -15,3 +15,16 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.rol})"
+
+#necesitamos un modelo para representar a los niños. Este modelo estará relacionado con el terapeuta que lo registra.
+
+class Nino(models.Model):
+    """
+    Modelo para representar a un niño.
+    """
+    nombre = models.CharField(max_length=100)
+    fecha_nacimiento = models.DateField()
+    terapeuta = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ninos_registrados')
+
+    def __str__(self):
+        return self.nombre
