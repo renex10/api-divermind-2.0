@@ -17,9 +17,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
 #Necesitamos un serializer para validar y procesar los datos del niño.
 #Archivo registros/serializers.py
 
-
+from rest_framework import serializers
+from .models import Nino
 
 class NinoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nino
-        fields = ['id', 'nombre', 'fecha_nacimiento']
+        fields = ['id', 'nombre', 'fecha_nacimiento', 'terapeuta']
+        read_only_fields = ['id', 'terapeuta']  # El ID y el terapeuta no se pueden modificar directamente
+
+
+""" class NinoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Nino
+        fields = ['id', 'nombre', 'fecha_nacimiento'] """

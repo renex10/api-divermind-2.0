@@ -29,7 +29,10 @@ SECRET_KEY = 'django-insecure-ji(y)%_w(&d5i@g7z+9nag$7(grgcno^bz(w(414+v$rv@yt@0
 DEBUG = os.getenv('DEBUG') == 'True'  # Esto convierte el valor de 'DEBUG' a un booleano
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost',
+    '127.0.0.1',
+    'LAPTOP-1DP06RFE',  # Agrega este valor
+    ]
 
 
 # Application definition
