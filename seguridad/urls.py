@@ -11,3 +11,6 @@ urlpatterns = [
     # Ruta para el login de usuarios
     path('seguridad/login/', Login.as_view(), name='login'),
 ]
+
+#http://127.0.0.1:8000/api/v1/registros/registro-nino/
+#http://127.0.0.1:8000/api/v1/seguridad/login/

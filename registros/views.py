@@ -82,8 +82,32 @@ class RegistroTerapeuta(Registro):
         except Exception as e:
             return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
- #Vista para Registrar un Niño
 
-#Ahora, crearemos una vista que permita a un terapeuta registrar un niño. Esta vista verificará que el usuario que realiza la solicitud sea un terapeuta.
+class RegistroProfesor(Registro):  # Heredar de la clase Registro
+    def post(self, request):
+        """
+        Registra un nuevo profesor en el sistema.
+        """
+        try:
+            # Llama al método crear_usuario de la clase padre (Registro)
+            usuario, token = self.crear_usuario(request)
+            
+            # Asigna el rol de profesor al usuario
+            user_profile = UserProfile.objects.create(user=usuario, rol='profesor')
+            
+            # Serializa el perfil de usuario para la respuesta
+            serializer = UserProfileSerializer(user_profile)
+            
+            # Retorna una respuesta personalizada
+            return Response({
+                "estado": "éxito",
+                "mensaje": "Profesor registrado correctamente",
+                "perfil": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 

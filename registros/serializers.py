@@ -27,6 +27,15 @@ class NinoSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'terapeuta']  # El ID y el terapeuta no se pueden modificar directamente
 
 
+
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'user', 'rol']
+        read_only_fields = ['id', 'user']  # El ID y el usuario no se pueden modificar directamente
+
 """ class NinoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Nino
