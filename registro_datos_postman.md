@@ -133,3 +133,55 @@ resultado al registrar a un padre:
 }
 }
 ```
+
+
+## El profesor envía una solicitud de vinculación:
+
+    El profesor autenticado envía una solicitud POST a la URL http://127.0.0.1:8000/api/v1/registros/solicitud-vinculacion/.
+
+    El cuerpo de la solicitud debe incluir el ID del niño (nino_id).
+
+    1. ingreso con las credenciales del profesor(no olvides que debes tener el token y estar en estado 1):
+```json
+    {
+
+
+   "correo": "profesor@example.com",
+    "password": "contraseña_segura"
+    }
+```
+    2. lo cual me permite dentro de  http://127.0.0.1:8000/api/v1/registros/solicitud-vinculacion/
+ pasarle el ID del niño:
+
+ ```json
+    {
+{
+    "nino_id": 1  // ID del niño al que se solicita acceso
+}
+    }
+
+
+----
+----
+----
+
+### tareas a realizar:
+    Notificación al Terapeuta:
+
+        Implementar un sistema de notificaciones para informar al terapeuta cuando se envíe una solicitud de vinculación.
+
+    Aprobación del Terapeuta:
+
+        Crear una vista que permita al terapeuta aprobar o rechazar las solicitudes de vinculación.
+
+    Notificación a los Padres:
+
+        Implementar un sistema de notificaciones para informar a los padres cuando el terapeuta apruebe una solicitud.
+
+    Consentimiento de los Padres:
+
+        Crear una vista que permita a los padres dar su consentimiento o rechazar la solicitud.
+
+    Acceso del Profesor:
+
+        Implementar la lógica para conceder acceso al profesor una vez que los padres den su consentimiento.

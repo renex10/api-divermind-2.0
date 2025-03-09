@@ -34,3 +34,17 @@ class NinoSerializer(serializers.ModelSerializer):
         nino.padres.set(padres)
         
         return nino
+    
+    
+    #Serializador SolicitudVinculacionSerializer
+
+#Este serializador se encargará de convertir los objetos SolicitudVinculacion en JSON y viceversa.
+from rest_framework import serializers
+from .models import SolicitudVinculacion  # Importar el modelo SolicitudVinculacion
+
+class SolicitudVinculacionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SolicitudVinculacion  # Modelo asociado al serializador
+        fields = ['id', 'profesor', 'nino', 'estado', 'fecha_solicitud']  # Campos a serializar
+        read_only_fields = ['id', 'fecha_solicitud']  # Campos que no se pueden modificar
+        
