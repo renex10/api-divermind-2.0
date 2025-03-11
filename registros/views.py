@@ -174,7 +174,118 @@ class EnviarSolicitudVinculacion(APIView):
             # Si ocurre un error inesperado, retornar un error 400
             return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
+#Vista AprobarSolicitudVinculacion
 
+#Crea una vista para que el terapeuta apruebe o rechace las solicitudes de vinculación:
+
+class AprobarSolicitudVinculacion(APIView):
+    @method_decorator(logueado(rol_requerido='terapeuta'))  # Solo los terapeutas pueden aprobar solicitudes
+    def post(self, request):
+        """
+        Aprueba o rechaza una solicitud de vinculación.
+        """
+        try:
+            # Obtener el ID de la solicitud y el nuevo estado desde el cuerpo de la solicitud
+            solicitud_id = request.data.get('solicitud_id')
+            nuevo_estado = request.data.get('estado')  # 'aprobada' o 'rechazada'
+
+            # Verificar que la solicitud exista y esté pendiente
+            solicitud = SolicitudVinculacion.objects.get(id=solicitud_id, estado='pendiente')
+
+            # Actualizar el estado de la solicitud
+            solicitud.estado = nuevo_estado
+            solicitud.save()
+
+            # Crear una notificación para los padres si la solicitud es aprobada
+            if nuevo_estado == 'aprobada':
+                mensaje = f"El terapeuta ha aprobado la solicitud de acceso a {solicitud.nino.nombre}."
+                Notificacion.objects.create(
+                    usuario=solicitud.nino.padres.first(),  # Notificar al primer padre
+                    mensaje=mensaje
+                )
+
+            # Retornar una respuesta de éxito
+            return Response({
+                "estado": "éxito",
+                "mensaje": f"Solicitud {nuevo_estado} correctamente",
+                "solicitud": SolicitudVinculacionSerializer(solicitud).data
+            }, status=status.HTTP_200_OK)
+        
+        except SolicitudVinculacion.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "La solicitud no existe o ya fue procesada"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+# Consentimiento de los Padres
+#Vista ConsentimientoPadre
+
+#Crea una vista para que los padres den su consentimiento o rechacen la solicitud:
+
+class ConsentimientoPadre(APIView):
+    @method_decorator(logueado(rol_requerido='padre'))  # Solo los padres pueden dar consentimiento
+    def post(self, request):
+        """
+        Da consentimiento o rechaza una solicitud de vinculación.
+        """
+        try:
+            # Obtener el ID de la solicitud y la decisión desde el cuerpo de la solicitud
+            solicitud_id = request.data.get('solicitud_id')
+            decision = request.data.get('decision')  # 'aprobada' o 'rechazada'
+
+            # Validar la decisión
+            if decision not in ['aprobada', 'rechazada']:
+                return Response({
+                    "estado": "error",
+                    "mensaje": "La decisión debe ser 'aprobada' o 'rechazada'."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Verificar que la solicitud exista y esté aprobada por el terapeuta
+            solicitud = SolicitudVinculacion.objects.get(id=solicitud_id, estado='aprobada')
+
+            # Actualizar el estado de la solicitud según la decisión del padre
+            if decision == 'aprobada':
+                solicitud.estado = 'consentida'
+            else:
+                solicitud.estado = 'rechazada'
+            solicitud.save()
+
+            # Crear una notificación para el profesor
+            mensaje_profesor = f"El padre ha {decision} la solicitud de acceso a {solicitud.nino.nombre}."
+            Notificacion.objects.create(
+                usuario=solicitud.profesor,
+                mensaje=mensaje_profesor
+            )
+
+            # Crear una notificación para el padre
+            mensaje_padre = f"Has {decision} la solicitud de acceso a {solicitud.nino.nombre}."
+            Notificacion.objects.create(
+                usuario=request.user,  # El padre que está dando el consentimiento
+                mensaje=mensaje_padre
+            )
+
+            # Retornar una respuesta de éxito
+            return Response({
+                "estado": "éxito",
+                "mensaje": f"Solicitud {decision} por el padre",
+                "solicitud": SolicitudVinculacionSerializer(solicitud).data
+            }, status=status.HTTP_200_OK)
+        
+        except SolicitudVinculacion.DoesNotExist:
+            return Response({
+                "estado": "error",
+                "mensaje": "La solicitud no existe o no está aprobada por el terapeuta."
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                "estado": "error",
+                "mensaje": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
 class VerNotificaciones(APIView):
     @method_decorator(logueado(rol_requerido='terapeuta'))  # Solo los terapeutas pueden ver notificaciones
     def get(self, request):
@@ -201,3 +312,32 @@ class VerNotificaciones(APIView):
         except Exception as e:
             # Si ocurre un error inesperado, retornar un error 400
             return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class VerNotificaciones(APIView):
+    @method_decorator(logueado(rol_requerido='terapeuta'))  # Solo los terapeutas pueden ver notificaciones
+    def get(self, request):
+        """
+        Obtiene las notificaciones del terapeuta.
+        """
+        try:
+            # Obtener las notificaciones del terapeuta que no han sido leídas
+            notificaciones = Notificacion.objects.filter(usuario=request.user, leida=False)
+            
+            # Serializar las notificaciones para la respuesta
+            notificaciones_data = [{
+                "id": notificacion.id,
+                "mensaje": notificacion.mensaje,
+                "fecha": notificacion.fecha.strftime("%Y-%m-%dT%H:%M:%S.%fZ")  # Formato ISO 8601
+            } for notificacion in notificaciones]
+            
+            # Retornar una respuesta de éxito
+            return Response({
+                "estado": "éxito",
+                "notificaciones": notificaciones_data
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            # Si ocurre un error inesperado, retornar un error 400
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+

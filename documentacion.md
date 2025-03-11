@@ -605,3 +605,6 @@ Sugerencias
     API Pública: Proporcionar una API pública para que otros sistemas puedan interactuar con este sistema (por ejemplo, para sincronizar datos con sistemas escolares).
 
     Webhooks: Implementar webhooks para notificar a otros sistemas sobre eventos importantes (por ejemplo, cuando se aprueba una solicitud de vinculación).
+
+
+    

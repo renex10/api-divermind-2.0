@@ -1,3 +1,4 @@
+# ruta de este archivo es: seguridad\views.py
 from django.shortcuts import render
 from rest_framework.views import APIView
 from django.http import Http404, JsonResponse, HttpResponseRedirect
@@ -14,8 +15,6 @@ from django.conf import settings
 from datetime import datetime, timedelta
 import time
 from jose import jwt
-
-#from django.core.exceptions import Http404
 
 # Carga las variables de entorno desde un archivo .env
 load_dotenv()

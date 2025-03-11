@@ -185,3 +185,8 @@ resultado al registrar a un padre:
     Acceso del Profesor:
 
         Implementar la lógica para conceder acceso al profesor una vez que los padres den su consentimiento.
+
+> Content-Type | > application/json
+> Authorization | > Bearer 
+
+
