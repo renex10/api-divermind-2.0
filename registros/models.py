@@ -1,5 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from datetime import datetime, timedelta
+
 
 class UserProfile(models.Model):
     """
@@ -72,3 +74,15 @@ class Notificacion(models.Model):
 
     def __str__(self):
         return f"Notificación para {self.usuario.username}: {self.mensaje}"
+    
+    
+    
+
+#No necesitas modificar el modelo UserProfile ni los demás modelos existentes. Sin embargo, debes agregar el modelo TokenRegistroTerapeuta para manejar los tokens de autorización.
+
+class TokenRegistroTerapeuta(models.Model):
+    token = models.CharField(max_length=100, unique=True)
+    expiracion = models.DateTimeField()
+
+    def __str__(self):
+        return f"Token: {self.token} (Expira: {self.expiracion})"

@@ -1,5 +1,6 @@
 # ruta de este archivo es: seguridad\views.py
 from django.shortcuts import render
+from registros.models import UserProfile
 from rest_framework.views import APIView
 from django.http import Http404, JsonResponse, HttpResponseRedirect
 from http import HTTPStatus
@@ -223,3 +224,106 @@ class Login(APIView):
             {"estado": "error", "mensaje": "Las credenciales ingresadas no son correctas"},
             status=HTTPStatus.UNAUTHORIZED,
         )
+        
+        
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import uuid
+from datetime import datetime, timedelta
+from .models import TokenRegistroTerapeuta
+from .permissions import EsAdministrador
+
+class GenerarTokenTerapeuta(APIView):
+    permission_classes = [EsAdministrador]  # Solo administradores pueden generar tokens
+
+    def get(self, request):
+        # Genera un token único
+        token = str(uuid.uuid4())
+        # Define una fecha de expiración (por ejemplo, 24 horas)
+        fecha_expiracion = datetime.now() + timedelta(hours=24)
+        # Guarda el token en la base de datos
+        TokenRegistroTerapeuta.objects.create(token=token, expiracion=fecha_expiracion)
+        return Response({"token": token}, status=status.HTTP_200_OK)
+
+class RegistroTerapeuta(APIView):
+    permission_classes = [EsAdministrador]  # Solo administradores pueden registrar terapeutas
+
+    def post(self, request):
+        token = request.data.get("token")
+        if not token:
+            return Response({"estado": "error", "mensaje": "Token requerido"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verifica que el token sea válido y no haya expirado
+        try:
+            token_obj = TokenRegistroTerapeuta.objects.get(token=token, expiracion__gte=datetime.now())
+        except TokenRegistroTerapeuta.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "Token inválido o expirado"}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Registra al terapeuta
+        try:
+            usuario = User.objects.create_user(
+                username=request.data["nombre"],
+                email=request.data["correo"],
+                password=request.data["password"],
+            )
+            UserProfile.objects.create(user=usuario, rol='terapeuta')
+            # Invalida el token después de su uso
+            token_obj.delete()
+            return Response({"estado": "éxito", "mensaje": "Terapeuta registrado correctamente"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+#Actualización: Crea las vistas para generar tokens y registrar terapeutas.
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+import uuid
+from datetime import datetime, timedelta
+from .models import TokenRegistroTerapeuta
+from .permissions import EsAdministrador
+
+class GenerarTokenTerapeuta(APIView):
+    permission_classes = [EsAdministrador]  # Solo administradores pueden generar tokens
+
+    def get(self, request):
+        # Genera un token único
+        token = str(uuid.uuid4())
+        # Define una fecha de expiración (por ejemplo, 24 horas)
+        fecha_expiracion = datetime.now() + timedelta(hours=24)
+        # Guarda el token en la base de datos
+        TokenRegistroTerapeuta.objects.create(token=token, expiracion=fecha_expiracion)
+        return Response({"token": token}, status=status.HTTP_200_OK)
+
+class RegistroTerapeuta(APIView):
+    permission_classes = [EsAdministrador]  # Solo administradores pueden registrar terapeutas
+
+    def post(self, request):
+        token = request.data.get("token")
+        if not token:
+            return Response({"estado": "error", "mensaje": "Token requerido"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verifica que el token sea válido y no haya expirado
+        try:
+            token_obj = TokenRegistroTerapeuta.objects.get(token=token, expiracion__gte=datetime.now())
+        except TokenRegistroTerapeuta.DoesNotExist:
+            return Response({"estado": "error", "mensaje": "Token inválido o expirado"}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Registra al terapeuta
+        try:
+            usuario = User.objects.create_user(
+                username=request.data["nombre"],
+                email=request.data["correo"],
+                password=request.data["password"],
+            )
+            UserProfile.objects.create(user=usuario, rol='terapeuta')
+            # Invalida el token después de su uso
+            token_obj.delete()
+            return Response({"estado": "éxito", "mensaje": "Terapeuta registrado correctamente"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)

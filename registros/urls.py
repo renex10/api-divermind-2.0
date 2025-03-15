@@ -1,7 +1,11 @@
 from django.urls import path
-from .views import AprobarSolicitudVinculacion, ConsentimientoPadre, EnviarSolicitudVinculacion, RegistroTerapeuta, RegistroNino,RegistroProfesor,RegistroPadre, VerNotificaciones  # Importa la clase RegistroNino
+
+from seguridad.views import GenerarTokenTerapeuta
+from .views import AprobarSolicitudVinculacion, ConsentimientoPadre, EnviarSolicitudVinculacion, RegistroAdministrador, RegistroTerapeuta, RegistroNino,RegistroProfesor,RegistroPadre, VerNotificaciones  # Importa la clase RegistroNino
 
 urlpatterns = [
+path('registros/registro-administrador/', RegistroAdministrador.as_view(), name='registro-administrador'),
+ path('registros/generar-token/', GenerarTokenTerapeuta.as_view(), name='generar-token'),
 path('registros/registro-terapeuta/', RegistroTerapeuta.as_view(), name='registro-terapeuta'),
 path('registros/registro-nino/', RegistroNino.as_view(), name='registro-nino'),
 path('registros/registro-profesor/', RegistroProfesor.as_view(), name='registro-profesor'),
@@ -9,10 +13,10 @@ path('registros/registro-profesor/', RegistroProfesor.as_view(), name='registro-
 path('registros/solicitud-vinculacion/', EnviarSolicitudVinculacion.as_view(), name='solicitud-vinculacion'),
  path('registros/notificaciones/', VerNotificaciones.as_view(), name='ver-notificaciones'), #en postma con metodo GET: http://127.0.0.1:8000/api/v1/registros/notificaciones/
     # Ruta para aprobar/rechazar solicitudes de vinculación
-  path('registros/aprobar-solicitud/', AprobarSolicitudVinculacion.as_view(), name='aprobar-solicitud'),
+path('registros/aprobar-solicitud/', AprobarSolicitudVinculacion.as_view(), name='aprobar-solicitud'),
   
      # Ruta para dar consentimiento o rechazar solicitudes
-    path('registros/consentimiento/', ConsentimientoPadre.as_view(), name='consentimiento'),
+path('registros/consentimiento/', ConsentimientoPadre.as_view(), name='consentimiento'),
       
 ]
 #http://127.0.0.1:8000/api/v1/registros/consentimiento/

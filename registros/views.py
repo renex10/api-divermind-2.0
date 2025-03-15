@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta
+import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from seguridad.decorators import logueado
 from seguridad.views import Registro
-from .models import Notificacion, SolicitudVinculacion, UserProfile
+from .models import Notificacion, SolicitudVinculacion, TokenRegistroTerapeuta, UserProfile
 from .serializers import SolicitudVinculacionSerializer, UserProfileSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -75,7 +77,9 @@ class RegistroPadre(Registro):  # Heredar de la clase Registro
             return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     
-    
+ #Modificar la Vista de Registro de Terapeutas
+
+#Actualiza la vista RegistroTerapeuta para que requiera un token válido.   
 class RegistroTerapeuta(Registro):
     def post(self, request):
         """
@@ -340,4 +344,34 @@ class VerNotificaciones(APIView):
         except Exception as e:
             # Si ocurre un error inesperado, retornar un error 400
             return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
 
+
+# Crear la Vista para Generar Tokens
+
+#Agrega una nueva vista para que los administradores puedan generar tokens de autorización.
+class GenerarTokenTerapeuta(APIView):
+    @method_decorator(logueado(rol_requerido='administrador'))  # Solo administradores pueden generar tokens
+    def get(self, request):
+        # Genera un token único
+        token = str(uuid.uuid4())
+        # Define una fecha de expiración (por ejemplo, 24 horas)
+        fecha_expiracion = datetime.now() + timedelta(hours=24)
+        # Guarda el token en la base de datos
+        TokenRegistroTerapeuta.objects.create(token=token, expiracion=fecha_expiracion)
+        return Response({"token": token}, status=status.HTTP_200_OK)
+        
+class RegistroAdministrador(APIView):
+    def post(self, request):
+        try:
+            # Crear el usuario
+            usuario = User.objects.create_user(
+                username=request.data["nombre"],
+                email=request.data["correo"],
+                password=request.data["password"],
+            )
+            # Asignar el rol de administrador
+            UserProfile.objects.create(user=usuario, rol='administrador')
+            return Response({"estado": "éxito", "mensaje": "Administrador registrado correctamente"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"estado": "error", "mensaje": str(e)}, status=status.HTTP_400_BAD_REQUEST)

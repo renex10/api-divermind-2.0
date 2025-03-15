@@ -15,3 +15,11 @@ class UsersMetadata(models.Model):
         db_table = 'users_metadata'  # Cambia el nombre de la tabla a 'users_metadata'
         verbose_name = "User metadata"  # Nombre legible para humanos del modelo en singular
         verbose_name_plural = "User metadata"  # Nombre legible para humanos del modelo en plural
+        
+        
+class TokenRegistroTerapeuta(models.Model):
+    token = models.CharField(max_length=100, unique=True)
+    expiracion = models.DateTimeField()
+
+    def __str__(self):
+        return f"Token: {self.token} (Expira: {self.expiracion})"
